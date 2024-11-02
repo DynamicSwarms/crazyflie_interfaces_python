@@ -6,7 +6,7 @@ class RPYTCommanderClient:
 
     def __init__(self, node: Node, prefix: str):
         callback_group = MutuallyExclusiveCallbackGroup
-        qos_profile = qos_profile
+        qos_profile = 10
 
         # self.rpyt_publisher = node.create_publisher(
         #    RPYT,
