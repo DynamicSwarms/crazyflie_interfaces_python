@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-
+import rclpy
 from rclpy.node import Node
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
@@ -7,7 +7,8 @@ from rclpy.parameter import Parameter
 from rcl_interfaces.msg import SetParametersResult
 from std_msgs.msg import Empty
 
-from typing import List
+from typing import List, Dict
+from numbers import Number
 
 
 class ParametersServer(ABC):
@@ -30,14 +31,10 @@ class ParametersServer(ABC):
             callback_group=callback_group,
         )
 
-        node.add_on_set_parameters_callback(self._set_parameter_callback)
-
-    def initalize_parameters(self, parameters: List[dict]):
-        for parameter in parameters:
-            group = parameter.group
-            name = parameter.name
-            type = parameter.type
-            self.node.declare_parameter(str(group) + "." + str(name), type)
+    def initalize_parameters(self, parameters: Dict[str, rclpy.Parameter.Type]):
+        for parameter_name in parameters.keys():
+            self.node.declare_parameter(parameter_name, parameters[parameter_name])
+        self.node.add_on_set_parameters_callback(self._set_parameter_callback)
 
     @abstractmethod
     def download_toc(self) -> None:
@@ -48,7 +45,7 @@ class ParametersServer(ABC):
         pass
 
     @abstractmethod
-    def set_parameter(self, group: str, name: str, value: Parameter.Type):
+    def set_parameter(self, group: str, name: str, value: Number):
         """This gets called if a parameter is set through ros
 
         Set the parameter in crazyflie appropriately
@@ -70,3 +67,4 @@ class ParametersServer(ABC):
         for param in params:
             group, name = param.name.split(".")
             self.set_parameter(group, name, param.value)
+        return SetParametersResult(successful=True)
