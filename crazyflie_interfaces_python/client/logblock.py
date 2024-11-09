@@ -1,6 +1,6 @@
 from rclpy.node import Node
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
-
+from rclpy.qos import QoSProfile, QoSDurabilityPolicy
 from std_msgs.msg import Int16, Empty
 
 from crazyflie_interfaces.msg import GenericLogData
@@ -18,20 +18,23 @@ class LogBlockClient:
     ):
         self.callback = callback
         callback_group = MutuallyExclusiveCallbackGroup()
-        qos_profile = 10
+        qos_profile_send = QoSProfile(
+            depth=10, durability=QoSDurabilityPolicy.TRANSIENT_LOCAL
+        )
+        qos_profile_receive = 10
         namespace = "{}/log/{}/".format(prefix, name)
 
         self.start_log_block_publisher = node.create_publisher(
             Int16,
             namespace + "start",
-            qos_profile=qos_profile,
+            qos_profile=qos_profile_send,
             callback_group=callback_group,
         )
 
         self.stop_log_block_publisher = node.create_publisher(
             Empty,
             namespace + "stop",
-            qos_profile=qos_profile,
+            qos_profile=qos_profile_send,
             callback_group=callback_group,
         )
 
@@ -39,7 +42,7 @@ class LogBlockClient:
             GenericLogData,
             namespace + "data",
             callback=self._log_data_callback,
-            qos_profile=qos_profile,
+            qos_profile=qos_profile_receive,
             callback_group=callback_group,
         )
 
