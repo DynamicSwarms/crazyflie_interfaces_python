@@ -6,4 +6,5 @@ from crazyflie_interfaces_python.server.high_level_commander import (
 )
 from crazyflie_interfaces_python.server.logblock import LogBlockServer
 from crazyflie_interfaces_python.server.logging import LoggingServer
+from crazyflie_interfaces_python.server.parameters import ParametersServer
 from crazyflie_interfaces_python.server.rpyt_commander import RPYTCommanderServer
