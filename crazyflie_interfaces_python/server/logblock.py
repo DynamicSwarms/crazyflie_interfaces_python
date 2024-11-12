@@ -6,6 +6,8 @@ from std_msgs.msg import Int16, Empty
 
 from typing import List, Callable
 
+from rclpy.qos import QoSProfile, QoSDurabilityPolicy
+
 
 class LogBlockServer:
 
@@ -21,7 +23,9 @@ class LogBlockServer:
             Int16,
             namespace + "start",
             self._start_log_block,
-            qos_profile=qos_profile,
+            qos_profile=QoSProfile(
+                depth=10, durability=QoSDurabilityPolicy.TRANSIENT_LOCAL
+            ),
             callback_group=callback_group,
         )
 
@@ -29,7 +33,9 @@ class LogBlockServer:
             Empty,
             namespace + "stop",
             self._stop_log_block,
-            qos_profile=qos_profile,
+            qos_profile=QoSProfile(
+                depth=10, durability=QoSDurabilityPolicy.TRANSIENT_LOCAL
+            ),
             callback_group=callback_group,
         )
 
@@ -52,6 +58,7 @@ class LogBlockServer:
         self.log_data_publisher.publish(msg)
 
     def _start_log_block(self, msg):
+        self.node.get_logger().info("Received")
         period_ms = msg.data
         if self._log_block_start_callback:
             return self._log_block_start_callback(period_ms)
