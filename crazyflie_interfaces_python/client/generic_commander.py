@@ -14,6 +14,14 @@ from typing import List
 
 
 class GenericCommanderClient:
+    """Send control setpoints to the Crazyflie.
+    For more information on the functionality of the setpoints visit the official bitcraze website:
+    https://www.bitcraze.io/documentation/repository/crazyflie-lib-python/master/api/cflib/crazyflie/commander/
+
+    This commander sends low-level setpoints directly to the PID/Mellinger controller of the Crazyflie.
+    Sending setpoints to far from current state can crash the crazyflie.
+    All low-level commands must be sent out regulary (>= 5Hz) in order not to trigger fail safe mechanisms in the Crazyflie.
+    """
 
     def __init__(self, node: Node, prefix: str):
         callback_group = MutuallyExclusiveCallbackGroup()
@@ -57,11 +65,13 @@ class GenericCommanderClient:
     def notify_setpoints_stop(
         self, remain_valid_milliseconds: int = 100, group_mask: int = 0
     ) -> None:
-        """Sends a notify setpoints command
+        """Send a notify setpoints command
+        Informs that streaming low-level setpoint packets are about to stop.
+        A common use case is to send this after the last low-level setpoint is sent but before the first high-level setpoint is sent.
 
         Args:
-            remain_valid_milliseconds (int, optional): _description_. Defaults to 100.
-            group_mask (int, optional): _description_. Defaults to 0.
+            remain_valid_milliseconds (int, optional): Artefact of pull-based hl-commander architecture no longer needed. Defaults to 100.
+            group_mask (int, optional): The group this should apply to. Deprecated Dec2024. Defaults to 0.
         """
         msg = NotifySetpointsStop()
         msg.group_mask = group_mask
@@ -69,11 +79,14 @@ class GenericCommanderClient:
         self.notify_setpoints_stop_publisher.publish(msg)
 
     def cmd_velocity_world(self, velocity: List[float], yawrate: float = 0.0) -> None:
-        """
+        """Send a velocity world setpoint to controller (low-level)
+
+        This control-command does not work with Mellinger controller.
+        Switch to PID controller if you are using this setpoint command.
 
         Args:
-            velocity (List[float]): _description_
-            yawrate (float, optional): _description_. Defaults to 0.0.
+            velocity (List[float]): Velocity in m/s in world coordinates (vx, vy, vz).
+            yawrate (float, optional): Angular velocity in degrees/s . Defaults to 0.0.
         """
         msg = VelocityWorld()
         x, y, z = velocity
@@ -88,13 +101,15 @@ class GenericCommanderClient:
         velocity_y: float = 0.0,
         yawrate: float = 0.0,
     ) -> None:
-        """Send a hover command
+        """Send a hover setpoint to controller (low-level)
+
+        Sets the crazyflie absolute height and velocity in body coordinate system.
 
         Args:
-            z_distance (float): _description_
-            velocity_x (float, optional): _description_. Defaults to 0.0.
-            velocity_y (float, optional): _description_. Defaults to 0.0.
-            yawrate (float, optional): _description_. Defaults to 0.0.
+            z_distance (float): Absolute height in m
+            velocity_x (float, optional): Velocity in x direction (body coordinates) in m/s. Defaults to 0.0.
+            velocity_y (float, optional): Velocity in y direction (body coordinates) in m/s. Defaults to 0.0.
+            yawrate (float, optional): Angular velocity in deg/s. Defaults to 0.0.
         """
         msg = Hover()
         msg.z_distance = z_distance
@@ -111,14 +126,16 @@ class GenericCommanderClient:
         orientation: List[float],
         angular_rate: List[float],
     ) -> None:
-        """Sends a full-state controller setpoint command
+        """Send a full-state setpoint to controller (low-level)
+
+        Can be used for aggressive maneuvers
 
         Args:
-            position (List[float]): _description_
-            velocity (List[float]): _description_
-            acceleration (List[float]): _description_
-            yaw (float): _description_
-            omega (List[float]): _description_
+            position (List[float]): Position [x, y, z] in m
+            velocity (List[float]): Velocity [vx, vy, vz] in m/s
+            acceleration (List[float]): Acceleration [ax, ay, az] in m/s^2
+            orientation (List[float]): Orientation in quaternion components [qx, qy, qz, qw]
+            omega (List[float]): Angular rates [Rollrate, Pitchrate, Yawrate] in degrees/s (TODO: rad/s ???)
         """
         pose = Pose()
         (pose.position.x, pose.position.y, pose.position.z) = position
@@ -143,10 +160,11 @@ class GenericCommanderClient:
         self.full_state_publisher.publish(msg)
 
     def cmd_position(self, position: List[float], yaw: float) -> None:
-        """
+        """Send a position setpoint to controller (low-level)
 
         Args:
-            position (List[float]): _description_
+            position (List[float]): Position [x, y, z] in m
+            yaw (float): Orientation in degrees
         """
         msg = Position()
         msg.x, msg.y, msg.z = position

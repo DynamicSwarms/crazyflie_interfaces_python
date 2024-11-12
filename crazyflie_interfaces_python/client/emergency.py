@@ -17,4 +17,5 @@ class EmergencyClient:
         )
 
     def emergency(self) -> None:
+        """Emergency stop. Cuts power, causes future commands to be ignored."""
         self.emergency_publisher.publish(Empty())
