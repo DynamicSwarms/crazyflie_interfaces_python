@@ -366,4 +366,7 @@ class HighLevelCommanderClient:
         i_seconds = int(seconds)
         fractional_seconds = seconds - i_seconds
         nanoseconds = int(fractional_seconds * 1_000_000_000)
-        return Duration(i_seconds, nanoseconds)
+        duration = Duration()
+        duration.sec = i_seconds
+        duration.nanosec = nanoseconds        
+        return duration
