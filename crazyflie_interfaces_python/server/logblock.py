@@ -58,7 +58,6 @@ class LogBlockServer:
         self.log_data_publisher.publish(msg)
 
     def _start_log_block(self, msg):
-        self.node.get_logger().info("Received")
         period_ms = msg.data
         if self._log_block_start_callback:
             return self._log_block_start_callback(period_ms)

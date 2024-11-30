@@ -65,6 +65,8 @@ class ParametersServer(ABC):
 
     def _set_parameter_callback(self, params: List[Parameter]) -> SetParametersResult:
         for param in params:
+            if len(param.name.split(".")) != 2:
+                continue
             group, name = param.name.split(".")
             self.set_parameter(group, name, param.value)
         return SetParametersResult(successful=True)

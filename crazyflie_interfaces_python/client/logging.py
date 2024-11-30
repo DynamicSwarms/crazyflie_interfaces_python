@@ -7,6 +7,16 @@ from typing import Callable, List
 
 
 class LoggingClient:
+    """The logging functionality of the crazyflie.
+    https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/functional-areas/crtp/crtp_log/
+
+    The logging on the crazyflie is segemented into log blocks.
+    Create a log block with variables from: (other implementations (webots or older crazyflie version) might not have
+    all logging variables available)
+    https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/api/logs/
+
+    This creates a LogBlockClient, on which you can start and stop the log block.
+    """
 
     def __init__(self, node: Node, prefix: str):
         self.node = node

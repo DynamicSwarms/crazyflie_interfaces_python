@@ -7,16 +7,14 @@ from typing import Callable
 
 
 class ConsoleClient:
+    """The console functionality of the crazyflie.
+
+    Console: https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/functional-areas/crtp/crtp_console/
+    The console messages from crazyflie are processed and sent as lines to the console topic.
+    Add a callback in constructor to acces the messages.
+    """
+
     def __init__(self, node: Node, prefix: str, callback: Callable[[str], None] = None):
-        """Initializes a Console client.
-
-        Pass a callback in order to receive message Strings sent from the crazyflie
-
-        Args:
-            node (Node): A rclpy Node to attach the subscriber to
-            prefix (str): The ros prefix for the crazyflie (e.g. cfXX)
-            callback (Callable[[str],]): A callback which gets called when a message gets received
-        """
         self.message_callback = callback
         callback_group = MutuallyExclusiveCallbackGroup()
         qos_profile = 10

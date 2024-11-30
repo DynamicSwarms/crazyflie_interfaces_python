@@ -9,6 +9,8 @@ from typing import Callable, List
 
 
 class LogBlockClient:
+    """If a log block was created you can use this to start and stop log blocks."""
+
     def __init__(
         self,
         node: Node,
