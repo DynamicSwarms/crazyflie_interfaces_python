@@ -216,6 +216,7 @@ class HighLevelCommanderClient:
         msg.relative = relative
         msg.linear = linear
         msg.duration = self.__seconds_to_duration(duration_seconds)
+        self.goto_publisher.publish(msg)
 
     def start_trajectory(
         self,
