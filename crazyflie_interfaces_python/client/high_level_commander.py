@@ -211,7 +211,7 @@ class HighLevelCommanderClient:
         """
         msg = GoTo()
         msg.group_mask = group_mask
-        msg.goal = Point(x, y, z)
+        msg.goal = Point(x=x, y=y, z=z)
         msg.yaw = yaw
         msg.relative = relative
         msg.linear = linear
