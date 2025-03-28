@@ -20,9 +20,9 @@ class CfPositionBuffer:
         self.node = node
         self.decay_time = decay_time
 
-        self.positions: Dict[str, PoseStamped] = (
-            {}
-        )  # Would it be good to maintain the parent id? Is it always world?
+        self.positions: Dict[
+            str, PoseStamped
+        ] = {}  # Would it be good to maintain the parent id? Is it always world?
         self.positions_lock: threading.Lock = threading.Lock()
 
     def set_position(self, pose: PoseStamped, parent_frame_id: str):
@@ -51,11 +51,12 @@ class CfPositionBuffer:
 
     def get_all_positions(self) -> List[PoseStamped]:
         poses = []
-        for frame in self.positions.keys(): 
+        for frame in list(self.positions.keys()):
             pose = self.get_position(frame)
             if pose is not None:
                 poses.append(pose)
         return poses
+
 
 class CfPositionListener:
     def __init__(self, buffer: CfPositionBuffer, node: Node):
