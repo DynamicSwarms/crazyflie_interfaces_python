@@ -50,9 +50,12 @@ class CfPositionBuffer:
         return None
 
     def get_all_positions(self) -> List[PoseStamped]:
-        with self.positions_lock:
-            return list(self.positions.values())
-
+        poses = []
+        for frame in self.positions.keys(): 
+            pose = self.get_position(frame)
+            if pose is not None:
+                poses.append(pose)
+        return poses
 
 class CfPositionListener:
     def __init__(self, buffer: CfPositionBuffer, node: Node):
