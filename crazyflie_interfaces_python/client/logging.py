@@ -1,8 +1,8 @@
 from rclpy.node import Node
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
-from crazyflie_interfaces.msg import LogBlock
-from crazyflie_interfaces_python.client.logblock import LogBlockClient
+from crazyflie_interfaces.srv import AddLogging, RemoveLogging
+from crazyflie_interfaces_python.client.logblock import LogBlock
 from typing import Callable, List
 
 
@@ -15,42 +15,59 @@ class LoggingClient:
     all logging variables available)
     https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/api/logs/
 
-    This creates a LogBlockClient, on which you can start and stop the log block.
+    This creates a LogBlock, which is used to remove it.
     """
 
     def __init__(self, node: Node, prefix: str):
         self.node = node
         self.prefix = prefix
         callback_group = MutuallyExclusiveCallbackGroup()
-        qos_profile = 10
 
-        self.create_log_block_publisher = node.create_publisher(
-            LogBlock,
-            prefix + "/create_log_block",
-            qos_profile=qos_profile,
+        self.create_log_block_client = node.create_client(
+            AddLogging,
+            prefix + "/add_logging",
+            callback_group=callback_group,
+        )
+
+        self.remove_log_block_client = node.create_client(
+            RemoveLogging,
+            prefix + "/remove_logging",
             callback_group=callback_group,
         )
 
     def create_log_block(
         self,
-        variables: List[str],
         name: str,
+        frequency_hz: float,
+        variables: List[str],
         callback: Callable[[List[float]], None],
-    ) -> LogBlockClient:
-        """Create a log block with given variables.
+    ) -> LogBlock:
+        """Create a log block with given variables and frequency.
 
         The created topic will have the specified name
 
         Args:
-            variables (List[str]): The logging variables (e.g. ["range.zrange", ])
             name (str): The name of the rostopic
+            frequency_hz (float): The frequency of the log block
+            variables (List[str]): The logging variables (e.g. ["range.zrange", ])
             callback (Callable[[List[float]], None]): A callback function for data beeing received
 
         Returns:
-            LogBlockClient: A LogBlockClient object with which the block can be started/stopped
+            LogBlock: A LogBlock object with which the block can be started/stopped
         """
-        msg = LogBlock()
-        msg.variables = variables
-        msg.name = name
-        self.create_log_block_publisher.publish(msg)
-        return LogBlockClient(self.node, self.prefix, name, callback)
+        req = AddLogging.Request()
+        req.topic_name = name
+        req.frequency = frequency_hz
+        req.vars = variables
+        self.create_log_block_client.call_async(req)
+        return LogBlock(self.node, self.prefix, name, callback)
+
+    def remove_log_block(self, log_block: LogBlock) -> None:
+        """Remove a log block with given name.
+
+        Args:
+            log_block (LogBlock): The log block to remove
+        """
+        req = RemoveLogging.Request()
+        req.topic_name = log_block.name
+        self.remove_log_block_client.call_async(req)

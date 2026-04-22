@@ -4,6 +4,6 @@ from crazyflie_interfaces_python.client.generic_commander import GenericCommande
 from crazyflie_interfaces_python.client.high_level_commander import (
     HighLevelCommanderClient,
 )
-from crazyflie_interfaces_python.client.logblock import LogBlockClient
+from crazyflie_interfaces_python.client.logblock import LogBlock
 from crazyflie_interfaces_python.client.logging import LoggingClient
 from crazyflie_interfaces_python.client.rpyt_commander import RPYTCommanderClient

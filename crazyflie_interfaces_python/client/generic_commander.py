@@ -3,12 +3,13 @@ from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
 from geometry_msgs.msg import Vector3, Pose, Twist, Point, Quaternion
 from crazyflie_interfaces.msg import (
-    NotifySetpointsStop,
     VelocityWorld,
     Hover,
     FullState,
     Position,
 )
+
+from crazyflie_interfaces.srv import NotifySetpointsStop
 
 from typing import List
 
@@ -27,10 +28,9 @@ class GenericCommanderClient:
         callback_group = MutuallyExclusiveCallbackGroup()
         qos_profile = 10  # Should this be passed?
 
-        self.notify_setpoints_stop_publisher = node.create_publisher(
+        self.notify_setpoints_stop_client = node.create_client(
             NotifySetpointsStop,
             prefix + "/notify_setpoints_stop",
-            qos_profile=qos_profile,
             callback_group=callback_group,
         )
 
@@ -73,10 +73,10 @@ class GenericCommanderClient:
             remain_valid_milliseconds (int, optional): Artefact of pull-based hl-commander architecture no longer needed. Defaults to 100.
             group_mask (int, optional): The group this should apply to. Deprecated Dec2024. Defaults to 0.
         """
-        msg = NotifySetpointsStop()
-        msg.group_mask = group_mask
-        msg.remain_valid_millisecs = remain_valid_milliseconds
-        self.notify_setpoints_stop_publisher.publish(msg)
+        req = NotifySetpointsStop.Request()
+        req.group_mask = group_mask
+        req.remain_valid_millisecs = remain_valid_milliseconds
+        self.notify_setpoints_stop_client.call_async(req)
 
     def cmd_velocity_world(self, velocity: List[float], yawrate: float = 0.0) -> None:
         """Send a velocity world setpoint to controller (low-level)
