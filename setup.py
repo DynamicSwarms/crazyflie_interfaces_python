@@ -17,7 +17,11 @@ setup(
     maintainer_email='winni@todo.todo',
     description='TODO: Package description',
     license='TODO: License declaration',
-    tests_require=['pytest'],
+    extras_require={
+        'test': [
+            'pytest',
+        ],
+    },
     entry_points={
         'console_scripts': [
         ],
